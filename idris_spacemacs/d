@@ -1,0 +1,72 @@
+#! /usr/bin/env bash
+
+volume=spacemacs-emacs-d
+spacemacs_github=https://github.com/syl20bnr/spacemacs
+spacemacs_local=spacemacs
+image_name=glmxndr/idris_spacemacs
+image_version=latest
+container_name=idris_spacemacs
+
+case "$1" in
+volume)
+  case "$2" in
+    create)
+      docker volume create $volume
+      if cd $spacemacs_local; then 
+        git pull 
+        cd ..
+      else 
+        git clone $spacemacs_github $spacemacs_local 
+      fi
+      docker container run  -v $volume:/data --name copy-helper -d busybox true 
+      docker container cp $spacemacs_local/. copy-helper:/data
+      docker container rm copy-helper
+      docker container run --rm -it -w /data -v $volume:/data busybox chmod -R 777 /data
+      ;;
+    rm)
+      docker volume rm $volume
+      ;;
+    inspect)
+      docker container run --rm -it -w /data -v $volume:/data busybox sh
+      ;;
+  esac
+  ;;
+image)
+  case "$2" in
+    create)
+      docker image build -t $image_name:$image_version .
+      ;;
+    rm)
+      docker image rm $image_name:$image_version
+      ;;
+    tag)
+      docker image tag $image_name:$image_version $image_name:$3
+      ;;
+  esac
+  ;;
+container)
+  case "$2" in
+    run)
+      docker container run -it --rm \
+        -v ~/.ssh/:/root/.ssh/:ro \
+        -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket \
+        -v /etc/localtime:/etc/localtime:ro \
+        -v /tmp/.X11-unix:/tmp/.X11-unix:rw \
+        -v /etc/machine-id:/etc/machine-id:ro \
+        -v $(realpath $libdir):/usr/src/lib \
+        -v $volume:/root/.emacs.d \
+	-u $UID \
+        -e DISPLAY=$DISPLAY \
+        -e TZ=UA \
+	-e QT_X11_NO_MITSHM=1 \
+        --name $container_name \
+        $image_name:$image_version \
+        ${@:3}
+      ;;
+    rm)
+      docker container kill $container_name
+      docker container rm $container_name
+      ;;
+  esac  
+  ;;
+esac
