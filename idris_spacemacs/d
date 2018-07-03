@@ -1,11 +1,11 @@
 #! /usr/bin/env bash
 
-volume=spacemacs-emacs-d
-spacemacs_github=https://github.com/syl20bnr/spacemacs
-spacemacs_local=spacemacs
-image_name=glmxndr/idris_spacemacs
-image_version=latest
-container_name=idris_spacemacs
+[ -z $volume           ] && volume=spacemacs-emacs-d
+[ -z $spacemacs_github ] && spacemacs_github=https://github.com/syl20bnr/spacemacs
+[ -z $spacemacs_local  ] && spacemacs_local=spacemacs
+[ -z $image_name       ] && image_name=glmxndr/idris_spacemacs
+[ -z $image_version    ] && image_version=latest
+[ -z $container_name   ] && container_name=idris_spacemacs
 
 case "$1" in
 volume)
@@ -55,7 +55,11 @@ container)
         -v /etc/machine-id:/etc/machine-id:ro \
         -v $(realpath $libdir):/usr/src/lib \
         -v $volume:/root/.emacs.d \
-	-u $UID \
+        -v ~/.vimrc:${HOME}/.vimrc \
+        -v ~/.vim:${HOME}/.vim \
+        -v ~/.tmux.conf:${HOME}/.tmux.conf \
+        -v ~/.tmux:${HOME}/.tmux \
+        -u $UID \
         -e DISPLAY=$DISPLAY \
         -e TZ=UA \
 	-e QT_X11_NO_MITSHM=1 \

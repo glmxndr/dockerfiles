@@ -30,6 +30,7 @@ RUN cd /usr/lib \
 RUN mkdir -p ${HOME}/.idris \
  && chmod -R 777 ${HOME}/.idris \
  && chmod 777 ${HOME}/.spacemacs \
+ && chmod -R 777 ${HOME}/.stack \
  && chmod 777 ${HOME}
 
 RUN git clone --depth 1 --branch release https://github.com/adobe-fonts/source-code-pro.git ~/.fonts/adobe-fonts/source-code-pro \
